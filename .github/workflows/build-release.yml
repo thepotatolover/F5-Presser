@@ -106,21 +106,13 @@ jobs:
         echo "Built executable: F5-Presser"
         ls -lh F5-Presser
     
-    - name: 📦 Create DMG package with background
+    - name: 📦 Create DMG package
       shell: bash
       run: |
         # Create DMG directory structure
         mkdir -p dmg_package
         cp dist/F5-Presser dmg_package/
         chmod +x dmg_package/F5-Presser
-        
-        # Copy background image if it exists
-        if [ -f "background.png" ]; then
-          cp background.png dmg_package/.background.png
-          echo "✅ Background image found and copied"
-        else
-          echo "⚠️  background.png not found, creating DMG without custom background"
-        fi
         
         # Create a temporary read-write DMG
         TEMP_DMG="temp_f5_presser.dmg"
@@ -136,58 +128,26 @@ jobs:
         # Create Applications symlink
         ln -s /Applications "$MOUNT_POINT/Applications" || true
         
-        # Set background and window properties using AppleScript with timeout
-        # Note: Background setting may not work in headless CI, but we try anyway
-        if [ -f "$MOUNT_POINT/.background.png" ]; then
-          # Write AppleScript to file without using heredoc
-          printf 'tell application "Finder"\n' > /tmp/set_dmg_background.scpt
-          printf '  tell disk "F5 Presser"\n' >> /tmp/set_dmg_background.scpt
-          printf '    open\n' >> /tmp/set_dmg_background.scpt
-          printf '    set current view of container window to icon view\n' >> /tmp/set_dmg_background.scpt
-          printf '    set toolbar visible of container window to false\n' >> /tmp/set_dmg_background.scpt
-          printf '    set statusbar visible of container window to false\n' >> /tmp/set_dmg_background.scpt
-          printf '    set the bounds of container window to {400, 100, 920, 420}\n' >> /tmp/set_dmg_background.scpt
-          printf '    set viewOptions to the icon view options of container window\n' >> /tmp/set_dmg_background.scpt
-          printf '    set arrangement of viewOptions to not arranged\n' >> /tmp/set_dmg_background.scpt
-          printf '    set icon size of viewOptions to 72\n' >> /tmp/set_dmg_background.scpt
-          printf '    try\n' >> /tmp/set_dmg_background.scpt
-          printf '      set bgFile to POSIX file "%s/.background.png"\n' "$MOUNT_POINT" >> /tmp/set_dmg_background.scpt
-          printf '      set background picture of viewOptions to bgFile\n' >> /tmp/set_dmg_background.scpt
-          printf '    on error\n' >> /tmp/set_dmg_background.scpt
-          printf '      -- Background setting failed, continue without it\n' >> /tmp/set_dmg_background.scpt
-          printf '    end try\n' >> /tmp/set_dmg_background.scpt
-          printf '    set position of item "F5-Presser" of container window to {160, 205}\n' >> /tmp/set_dmg_background.scpt
-          printf '    set position of item "Applications" of container window to {360, 205}\n' >> /tmp/set_dmg_background.scpt
-          printf '    close\n' >> /tmp/set_dmg_background.scpt
-          printf '    update without registering applications\n' >> /tmp/set_dmg_background.scpt
-          printf '  end tell\n' >> /tmp/set_dmg_background.scpt
-          printf 'end tell\n' >> /tmp/set_dmg_background.scpt
-          # Run with timeout to prevent hanging
-          timeout 30 osascript /tmp/set_dmg_background.scpt 2>&1 || echo "⚠️  AppleScript execution completed (background may not be set)"
-          rm -f /tmp/set_dmg_background.scpt
-          echo "✅ Window layout configured"
-        else
-          # Simplified script without background
-          printf 'tell application "Finder"\n' > /tmp/set_dmg_layout.scpt
-          printf '  tell disk "F5 Presser"\n' >> /tmp/set_dmg_layout.scpt
-          printf '    open\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set current view of container window to icon view\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set toolbar visible of container window to false\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set statusbar visible of container window to false\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set the bounds of container window to {400, 100, 920, 420}\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set viewOptions to the icon view options of container window\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set arrangement of viewOptions to not arranged\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set icon size of viewOptions to 72\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set position of item "F5-Presser" of container window to {160, 205}\n' >> /tmp/set_dmg_layout.scpt
-          printf '    set position of item "Applications" of container window to {360, 205}\n' >> /tmp/set_dmg_layout.scpt
-          printf '    close\n' >> /tmp/set_dmg_layout.scpt
-          printf '    update without registering applications\n' >> /tmp/set_dmg_layout.scpt
-          printf '  end tell\n' >> /tmp/set_dmg_layout.scpt
-          printf 'end tell\n' >> /tmp/set_dmg_layout.scpt
-          timeout 30 osascript /tmp/set_dmg_layout.scpt 2>&1 || echo "⚠️  AppleScript execution completed"
-          rm -f /tmp/set_dmg_layout.scpt
-          echo "✅ Window layout configured (no background image)"
-        fi
+        # Set window properties using AppleScript
+        printf 'tell application "Finder"\n' > /tmp/set_dmg_layout.scpt
+        printf '  tell disk "F5 Presser"\n' >> /tmp/set_dmg_layout.scpt
+        printf '    open\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set current view of container window to icon view\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set toolbar visible of container window to false\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set statusbar visible of container window to false\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set the bounds of container window to {400, 100, 920, 420}\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set viewOptions to the icon view options of container window\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set arrangement of viewOptions to not arranged\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set icon size of viewOptions to 72\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set position of item "F5-Presser" of container window to {160, 205}\n' >> /tmp/set_dmg_layout.scpt
+        printf '    set position of item "Applications" of container window to {360, 205}\n' >> /tmp/set_dmg_layout.scpt
+        printf '    close\n' >> /tmp/set_dmg_layout.scpt
+        printf '    update without registering applications\n' >> /tmp/set_dmg_layout.scpt
+        printf '  end tell\n' >> /tmp/set_dmg_layout.scpt
+        printf 'end tell\n' >> /tmp/set_dmg_layout.scpt
+        osascript /tmp/set_dmg_layout.scpt 2>&1 || echo "⚠️  Window layout may not be configured"
+        rm -f /tmp/set_dmg_layout.scpt
+        echo "✅ Window layout configured"
         
         # Unmount the DMG
         hdiutil detach "$DEVICE" || true
@@ -202,7 +162,7 @@ jobs:
         rm -f "$TEMP_DMG"
         rm -rf dmg_package
         
-        echo "✅ DMG created successfully with background"
+        echo "✅ DMG created successfully"
         ls -lh dist/F5-Presser.dmg
     
     - name: 📤 Upload macOS artifact
