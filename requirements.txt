@@ -1,0 +1,2 @@
+# Production dependencies
+pynput>=1.7.6,<2.0.0
