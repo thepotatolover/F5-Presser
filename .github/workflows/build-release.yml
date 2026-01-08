@@ -151,10 +151,11 @@ jobs:
           printf '    set icon size of viewOptions to 72\n' >> /tmp/set_dmg_background.scpt
           printf '    delay 1\n' >> /tmp/set_dmg_background.scpt
           printf '    try\n' >> /tmp/set_dmg_background.scpt
-          printf '      set bgFile to file ".background.png" of disk "F5 Presser"\n' >> /tmp/set_dmg_background.scpt
+          printf '      set bgPath to "%s/.background.png"\n' "$MOUNT_POINT" >> /tmp/set_dmg_background.scpt
+          printf '      set bgFile to POSIX file bgPath\n' >> /tmp/set_dmg_background.scpt
           printf '      set background picture of viewOptions to bgFile\n' >> /tmp/set_dmg_background.scpt
-          printf '    on error errMsg\n' >> /tmp/set_dmg_background.scpt
-          printf '      log "Background setting failed: " & errMsg\n' >> /tmp/set_dmg_background.scpt
+          printf '    on error\n' >> /tmp/set_dmg_background.scpt
+          printf '      -- Background setting failed, DMG will work without custom background\n' >> /tmp/set_dmg_background.scpt
           printf '    end try\n' >> /tmp/set_dmg_background.scpt
           printf '    set position of item "F5-Presser" of container window to {160, 205}\n' >> /tmp/set_dmg_background.scpt
           printf '    set position of item "Applications" of container window to {360, 205}\n' >> /tmp/set_dmg_background.scpt
