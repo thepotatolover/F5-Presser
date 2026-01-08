@@ -45,7 +45,7 @@ You can also trigger a release manually:
 The workflow builds standalone executables using PyInstaller:
 
 - **Windows**: Single `.exe` file (no console window)
-- **macOS**: Single executable binary
+- **macOS**: DMG disk image containing the executable (ready to install)
 - **Linux**: Single executable binary
 
 All executables are self-contained and don't require Python to be installed.

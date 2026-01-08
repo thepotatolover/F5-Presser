@@ -148,7 +148,7 @@ Pre-built executables are automatically created for each release. Download the l
 ### Available Platforms
 
 - **Windows**: `F5-Presser-Windows.exe` - Ready to run, no Python required!
-- **macOS**: `F5-Presser-macOS` - May require accessibility permissions
+- **macOS**: `F5-Presser-macOS.dmg` - DMG disk image, drag to Applications to install
 - **Linux**: `F5-Presser-Linux` - Ready to run on most Linux distributions
 
 ### Building Your Own

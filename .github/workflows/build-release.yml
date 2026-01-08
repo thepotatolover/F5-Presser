@@ -106,11 +106,29 @@ jobs:
         echo "Built executable: F5-Presser"
         ls -lh F5-Presser
     
+    - name: 📦 Create DMG package
+      shell: bash
+      run: |
+        # Create DMG directory structure
+        mkdir -p dmg_package
+        cp dist/F5-Presser dmg_package/
+        chmod +x dmg_package/F5-Presser
+        
+        # Create DMG using hdiutil (native macOS tool)
+        # UDZO format = compressed read-only DMG
+        hdiutil create -volname "F5 Presser" -srcfolder dmg_package -ov -format UDZO -imagekey zlib-level=9 dist/F5-Presser.dmg
+        
+        echo "✅ DMG created successfully"
+        ls -lh dist/F5-Presser.dmg
+        
+        # Cleanup temporary directory
+        rm -rf dmg_package
+    
     - name: 📤 Upload macOS artifact
       uses: actions/upload-artifact@v4
       with:
         name: F5-Presser-macOS
-        path: dist/F5-Presser
+        path: dist/F5-Presser.dmg
         retention-days: 30
   
   build-linux:
@@ -206,11 +224,10 @@ jobs:
           cp artifacts/F5-Presser-Windows/F5-Presser.exe release/F5-Presser-Windows.exe
           echo "✅ Windows executable ready"
         fi
-        # Copy macOS executable
-        if [ -f "artifacts/F5-Presser-macOS/F5-Presser" ]; then
-          cp artifacts/F5-Presser-macOS/F5-Presser release/F5-Presser-macOS
-          chmod +x release/F5-Presser-macOS
-          echo "✅ macOS executable ready"
+        # Copy macOS DMG
+        if [ -f "artifacts/F5-Presser-macOS/F5-Presser.dmg" ]; then
+          cp artifacts/F5-Presser-macOS/F5-Presser.dmg release/F5-Presser-macOS.dmg
+          echo "✅ macOS DMG ready"
         fi
         # Copy Linux executable
         if [ -f "artifacts/F5-Presser-Linux/F5-Presser" ]; then
@@ -236,8 +253,8 @@ jobs:
         "
         fi
         
-        if [ -f "release/F5-Presser-macOS" ]; then
-          NOTES="${NOTES}- **macOS**: [F5-Presser-macOS](https://github.com/thepotatolover/F5-Presser/releases/download/v${VERSION}/F5-Presser-macOS)
+        if [ -f "release/F5-Presser-macOS.dmg" ]; then
+          NOTES="${NOTES}- **macOS**: [F5-Presser-macOS.dmg](https://github.com/thepotatolover/F5-Presser/releases/download/v${VERSION}/F5-Presser-macOS.dmg)
         "
         fi
         
@@ -254,11 +271,22 @@ jobs:
         
         ### 🚀 Usage
         
-        1. Download the executable for your platform
+        **Windows:**
+        1. Download F5-Presser-Windows.exe
         2. Run the executable
         3. The script will automatically press F5 at regular intervals
         
-        **Note**: On macOS, you may need to grant accessibility permissions in System Preferences.
+        **macOS:**
+        1. Download F5-Presser-macOS.dmg
+        2. Open the DMG file
+        3. Drag F5-Presser to Applications (or run directly)
+        4. Grant accessibility permissions in System Preferences if prompted
+        5. Run the application
+        
+        **Linux:**
+        1. Download F5-Presser-Linux
+        2. Make it executable: \`chmod +x F5-Presser-Linux\`
+        3. Run: \`./F5-Presser-Linux\`
         "
         
         echo "notes<<EOF" >> $GITHUB_OUTPUT
