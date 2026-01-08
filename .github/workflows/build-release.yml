@@ -138,7 +138,7 @@ jobs:
         
         # Set background and window properties using AppleScript
         if [ -f "$MOUNT_POINT/.background.png" ]; then
-          osascript <<EOF
+          cat > /tmp/dmg_setup.scpt << 'SCRIPT_END'
             tell application "Finder"
               tell disk "F5 Presser"
                 open
@@ -159,11 +159,11 @@ jobs:
                 delay 2
               end tell
             end tell
-          EOF
+          SCRIPT_END
+          osascript /tmp/dmg_setup.scpt || true
           echo "✅ Background image and window layout configured"
         else
-          # Set window properties without background
-          osascript <<EOF
+          cat > /tmp/dmg_setup.scpt << 'SCRIPT_END'
             tell application "Finder"
               tell disk "F5 Presser"
                 open
@@ -182,9 +182,11 @@ jobs:
                 delay 2
               end tell
             end tell
-          EOF
+          SCRIPT_END
+          osascript /tmp/dmg_setup.scpt || true
           echo "✅ Window layout configured (no background image)"
         fi
+        rm -f /tmp/dmg_setup.scpt
         
         # Unmount the DMG
         hdiutil detach "$DEVICE" || true
