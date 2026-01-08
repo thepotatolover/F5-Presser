@@ -138,35 +138,32 @@ jobs:
         
         # Set background and window properties using AppleScript
         if [ -f "$MOUNT_POINT/.background.png" ]; then
-          # Use a script file to avoid heredoc issues
-          cat > /tmp/set_dmg_background.scpt << 'SCRIPT'
-            tell application "Finder"
-              tell disk "F5 Presser"
-                open
-                set current view of container window to icon view
-                set toolbar visible of container window to false
-                set statusbar visible of container window to false
-                set the bounds of container window to {400, 100, 920, 420}
-                set viewOptions to the icon view options of container window
-                set arrangement of viewOptions to not arranged
-                set icon size of viewOptions to 72
-                delay 1
-                try
-                  set bgFile to file ".background.png" of disk "F5 Presser"
-                  set background picture of viewOptions to bgFile
-                on error errMsg
-                  -- Background setting failed, continue without it
-                  log "Background setting failed: " & errMsg
-                end try
-                set position of item "F5-Presser" of container window to {160, 205}
-                set position of item "Applications" of container window to {360, 205}
-                close
-                open
-                update without registering applications
-                delay 2
-              end tell
-            end tell
-SCRIPT
+          # Write AppleScript to file without using heredoc
+          printf 'tell application "Finder"\n' > /tmp/set_dmg_background.scpt
+          printf '  tell disk "F5 Presser"\n' >> /tmp/set_dmg_background.scpt
+          printf '    open\n' >> /tmp/set_dmg_background.scpt
+          printf '    set current view of container window to icon view\n' >> /tmp/set_dmg_background.scpt
+          printf '    set toolbar visible of container window to false\n' >> /tmp/set_dmg_background.scpt
+          printf '    set statusbar visible of container window to false\n' >> /tmp/set_dmg_background.scpt
+          printf '    set the bounds of container window to {400, 100, 920, 420}\n' >> /tmp/set_dmg_background.scpt
+          printf '    set viewOptions to the icon view options of container window\n' >> /tmp/set_dmg_background.scpt
+          printf '    set arrangement of viewOptions to not arranged\n' >> /tmp/set_dmg_background.scpt
+          printf '    set icon size of viewOptions to 72\n' >> /tmp/set_dmg_background.scpt
+          printf '    delay 1\n' >> /tmp/set_dmg_background.scpt
+          printf '    try\n' >> /tmp/set_dmg_background.scpt
+          printf '      set bgFile to file ".background.png" of disk "F5 Presser"\n' >> /tmp/set_dmg_background.scpt
+          printf '      set background picture of viewOptions to bgFile\n' >> /tmp/set_dmg_background.scpt
+          printf '    on error errMsg\n' >> /tmp/set_dmg_background.scpt
+          printf '      log "Background setting failed: " & errMsg\n' >> /tmp/set_dmg_background.scpt
+          printf '    end try\n' >> /tmp/set_dmg_background.scpt
+          printf '    set position of item "F5-Presser" of container window to {160, 205}\n' >> /tmp/set_dmg_background.scpt
+          printf '    set position of item "Applications" of container window to {360, 205}\n' >> /tmp/set_dmg_background.scpt
+          printf '    close\n' >> /tmp/set_dmg_background.scpt
+          printf '    open\n' >> /tmp/set_dmg_background.scpt
+          printf '    update without registering applications\n' >> /tmp/set_dmg_background.scpt
+          printf '    delay 2\n' >> /tmp/set_dmg_background.scpt
+          printf '  end tell\n' >> /tmp/set_dmg_background.scpt
+          printf 'end tell\n' >> /tmp/set_dmg_background.scpt
           osascript /tmp/set_dmg_background.scpt || true
           rm -f /tmp/set_dmg_background.scpt
           echo "✅ Background image and window layout configured"
