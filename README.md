@@ -53,7 +53,7 @@ A simple yet powerful Python script that automatically presses the F5 key at reg
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/F5-Presser.git
+   git clone https://github.com/thepotatolover/F5-Presser.git
    cd F5-Presser
    ```
 
@@ -182,7 +182,7 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ### Getting Help
 
-- 📖 Check existing [Issues](https://github.com/yourusername/F5-Presser/issues)
+- 📖 Check existing [Issues](https://github.com/thepotatolover/F5-Presser/issues)
 - 💬 Open a new issue with details about your problem
 - 📧 Contact maintainers (if contact info available)
 
@@ -198,7 +198,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [pynput](https://github.com/moses-palmer/pynput) - Cross-platform input control library
 - Inspired by the need to automate repetitive tasks
-- Thanks to all [contributors](https://github.com/yourusername/F5-Presser/graphs/contributors)!
+- Thanks to all [contributors](https://github.com/thepotatolover/F5-Presser/graphs/contributors)!
 
 ---
 
@@ -208,6 +208,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ⭐ Star this repo if you find it useful!
 
-[Report Bug](https://github.com/yourusername/F5-Presser/issues) • [Request Feature](https://github.com/yourusername/F5-Presser/issues) • [View Documentation](https://github.com/yourusername/F5-Presser#readme)
+[Report Bug](https://github.com/thepotatolover/F5-Presser/issues) • [Request Feature](https://github.com/thepotatolover/F5-Presser/issues) • [View Documentation](https://github.com/thepotatolover/F5-Presser#readme)
 
 </div>

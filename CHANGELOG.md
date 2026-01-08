@@ -42,5 +42,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic error handling
 - Console output feedback
 
-[Unreleased]: https://github.com/yourusername/F5-Presser/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourusername/F5-Presser/releases/tag/v1.0.0
+[Unreleased]: https://github.com/thepotatolover/F5-Presser/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/thepotatolover/F5-Presser/releases/tag/v1.0.0

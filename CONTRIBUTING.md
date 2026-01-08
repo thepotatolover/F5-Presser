@@ -34,7 +34,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ## 🚀 Getting Started
 
 Before you begin:
-1. Check existing [Issues](https://github.com/yourusername/F5-Presser/issues) and [Pull Requests](https://github.com/yourusername/F5-Presser/pulls) to avoid duplicate work
+1. Check existing [Issues](https://github.com/thepotatolover/F5-Presser/issues) and [Pull Requests](https://github.com/thepotatolover/F5-Presser/pulls) to avoid duplicate work
 2. If you're unsure about something, feel free to ask in an issue
 3. Start with small, focused changes if you're new to the project
 
@@ -113,7 +113,7 @@ Pull requests are the best way to propose changes. Here's how:
 #### 1. **Fork and Clone**
 ```bash
 # Fork the repository on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/F5-Presser.git
+   git clone https://github.com/thepotatolover/F5-Presser.git
 cd F5-Presser
 ```
 
@@ -184,7 +184,7 @@ Then open a Pull Request on GitHub with:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/F5-Presser.git
+   git clone https://github.com/thepotatolover/F5-Presser.git
    cd F5-Presser
    ```
 

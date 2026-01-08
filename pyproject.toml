@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "thepotatolover", email = ""}
 ]
 keywords = ["automation", "keyboard", "f5", "refresh", "pynput"]
 classifiers = [
@@ -43,10 +43,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/F5-Presser"
-Documentation = "https://github.com/yourusername/F5-Presser#readme"
-Repository = "https://github.com/yourusername/F5-Presser"
-Issues = "https://github.com/yourusername/F5-Presser/issues"
+Homepage = "https://github.com/thepotatolover/F5-Presser"
+Documentation = "https://github.com/thepotatolover/F5-Presser#readme"
+Repository = "https://github.com/thepotatolover/F5-Presser"
+Issues = "https://github.com/thepotatolover/F5-Presser/issues"
 
 [tool.black]
 line-length = 88

@@ -15,13 +15,16 @@ If you discover a security vulnerability, please **do not** open a public issue.
 
 ### 📧 How to Report
 
-1. **Email**: Send details to [security@example.com](mailto:security@example.com)
-   - Include a clear description of the vulnerability
-   - Provide steps to reproduce the issue
-   - Include potential impact assessment
-   - Suggest a fix if you have one
+1. **GitHub Security Advisory**: Use GitHub's private vulnerability reporting feature
+   - Go to the [Security tab](https://github.com/thepotatolover/F5-Presser/security/advisories/new)
+   - Click "Report a vulnerability"
+   - Fill out the security advisory form with:
+     - Clear description of the vulnerability
+     - Steps to reproduce the issue
+     - Potential impact assessment
+     - Suggested fix (if available)
 
-2. **GitHub Security Advisory**: Use GitHub's private vulnerability reporting feature if available
+2. **GitHub Issues**: For non-critical security issues, you can open a private security issue
 
 ### 📋 What to Include
 
