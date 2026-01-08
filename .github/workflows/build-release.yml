@@ -1,0 +1,235 @@
+name: 🔨 Build & Release Executable
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: false
+        type: string
+      build_windows:
+        description: 'Build Windows executable'
+        required: false
+        default: true
+        type: boolean
+      build_macos:
+        description: 'Build macOS executable'
+        required: false
+        default: false
+        type: boolean
+      build_linux:
+        description: 'Build Linux executable'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  build:
+    name: 🔨 Build Executables
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+            artifact_name: F5-Presser-Windows.exe
+            build_enabled: ${{ github.event.inputs.build_windows != 'false' }}
+          - os: macos-latest
+            name: macOS
+            artifact_name: F5-Presser-macOS
+            build_enabled: ${{ github.event.inputs.build_macos == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
+          - os: ubuntu-latest
+            name: Linux
+            artifact_name: F5-Presser-Linux
+            build_enabled: ${{ github.event.inputs.build_linux == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
+    
+    runs-on: ${{ matrix.os }}
+    if: matrix.build_enabled != 'false'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: 🔨 Build executable with PyInstaller
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          pyinstaller --onefile --name "F5-Presser" --clean --noconsole main.py
+        else
+          pyinstaller --onefile --name "F5-Presser" --clean main.py
+        fi
+    
+    - name: 📦 Prepare artifact
+      shell: bash
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          cd dist
+          echo "Built executable: F5-Presser.exe"
+          ls -lh F5-Presser.exe
+        else
+          cd dist
+          chmod +x F5-Presser
+          echo "Built executable: F5-Presser"
+          ls -lh F5-Presser
+        fi
+    
+    - name: 📤 Upload Windows artifact
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: F5-Presser-Windows
+        path: dist/F5-Presser.exe
+        retention-days: 30
+    
+    - name: 📤 Upload macOS artifact
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        name: F5-Presser-macOS
+        path: dist/F5-Presser
+        retention-days: 30
+    
+    - name: 📤 Upload Linux artifact
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: F5-Presser-Linux
+        path: dist/F5-Presser
+        retention-days: 30
+
+  release:
+    name: 🚀 Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🏷️ Get version from tag or input
+      id: get_version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ -z "$VERSION" ]]; then
+            VERSION=$(date +%Y.%m.%d)
+          fi
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "📌 Release version: $VERSION"
+    
+    - name: 📥 Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: 📋 Prepare release files
+      shell: bash
+      run: |
+        mkdir -p release
+        # Copy Windows executable
+        if [ -f "artifacts/F5-Presser-Windows/F5-Presser.exe" ]; then
+          cp artifacts/F5-Presser-Windows/F5-Presser.exe release/F5-Presser-Windows.exe
+          echo "✅ Windows executable ready"
+        fi
+        # Copy macOS executable
+        if [ -f "artifacts/F5-Presser-macOS/F5-Presser" ]; then
+          cp artifacts/F5-Presser-macOS/F5-Presser release/F5-Presser-macOS
+          chmod +x release/F5-Presser-macOS
+          echo "✅ macOS executable ready"
+        fi
+        # Copy Linux executable
+        if [ -f "artifacts/F5-Presser-Linux/F5-Presser" ]; then
+          cp artifacts/F5-Presser-Linux/F5-Presser release/F5-Presser-Linux
+          chmod +x release/F5-Presser-Linux
+          echo "✅ Linux executable ready"
+        fi
+        ls -lh release/
+    
+    - name: 📝 Generate release notes
+      id: release_notes
+      shell: bash
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+        NOTES="## 🎉 Release v${VERSION}
+        
+        ### 📦 Downloads
+        
+        "
+        
+        if [ -f "release/F5-Presser-Windows.exe" ]; then
+          NOTES="${NOTES}- **Windows**: [F5-Presser-Windows.exe](https://github.com/thepotatolover/F5-Presser/releases/download/v${VERSION}/F5-Presser-Windows.exe)
+        "
+        fi
+        
+        if [ -f "release/F5-Presser-macOS" ]; then
+          NOTES="${NOTES}- **macOS**: [F5-Presser-macOS](https://github.com/thepotatolover/F5-Presser/releases/download/v${VERSION}/F5-Presser-macOS)
+        "
+        fi
+        
+        if [ -f "release/F5-Presser-Linux" ]; then
+          NOTES="${NOTES}- **Linux**: [F5-Presser-Linux](https://github.com/thepotatolover/F5-Presser/releases/download/v${VERSION}/F5-Presser-Linux)
+        "
+        fi
+        
+        NOTES="${NOTES}
+        
+        ### 📋 Changes
+        
+        See [CHANGELOG.md](https://github.com/thepotatolover/F5-Presser/blob/main/CHANGELOG.md) for details.
+        
+        ### 🚀 Usage
+        
+        1. Download the executable for your platform
+        2. Run the executable
+        3. The script will automatically press F5 at regular intervals
+        
+        **Note**: On macOS, you may need to grant accessibility permissions in System Preferences.
+        "
+        
+        echo "notes<<EOF" >> $GITHUB_OUTPUT
+        echo "$NOTES" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: 🏷️ Create Git Tag (if manual dispatch)
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
+        git push origin "v${{ steps.get_version.outputs.version }}"
+    
+    - name: 📤 Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*
+        tag_name: v${{ steps.get_version.outputs.version }}
+        name: Release v${{ steps.get_version.outputs.version }}
+        body: ${{ steps.release_notes.outputs.notes }}
+        draft: false
+        prerelease: false
+        make_latest: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -49,6 +49,11 @@ run: ## Run the main script
 build: ## Build the package
 	python -m build
 
+build-exe: ## Build executable with PyInstaller
+	pip install pyinstaller
+	pyinstaller --onefile --name "F5-Presser" --clean main.py
+	@echo "✅ Executable built! Check dist/F5-Presser.exe"
+
 check: format-check lint test ## Run all checks (format, lint, test)
 
 ci: install-dev format-check lint ## Run CI checks locally

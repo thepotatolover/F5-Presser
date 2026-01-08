@@ -141,6 +141,22 @@ See `requirements.txt` for the complete list.
 
 ---
 
+## 📥 Download Pre-built Executables
+
+Pre-built executables are automatically created for each release. Download the latest version from the [Releases page](https://github.com/thepotatolover/F5-Presser/releases).
+
+### Available Platforms
+
+- **Windows**: `F5-Presser-Windows.exe` - Ready to run, no Python required!
+- **macOS**: `F5-Presser-macOS` - May require accessibility permissions
+- **Linux**: `F5-Presser-Linux` - Ready to run on most Linux distributions
+
+### Building Your Own
+
+See [BUILD.md](BUILD.md) for instructions on building executables locally.
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
