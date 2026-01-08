@@ -68,8 +68,20 @@ pyinstaller --onefile \
 
 After building, you'll find:
 - **Executable**: `dist/F5-Presser.exe` (Windows) or `dist/F5-Presser` (macOS/Linux)
+- **DMG**: `dist/F5-Presser.dmg` (macOS - includes background.png if present)
 - **Build files**: `build/` folder (can be deleted after building)
 - **Spec file**: `F5-Presser.spec` (PyInstaller configuration)
+
+## 🎨 DMG Background Image
+
+The automated build process for macOS includes a custom background image in the DMG:
+
+- Place `background.png` in the project root
+- The image will be automatically included in the DMG
+- Recommended size: 600x400 pixels or similar
+- The background will be set when users open the DMG
+
+If `background.png` is not found, the DMG will be created without a custom background.
 
 ## 🎯 PyInstaller Options Explained
 

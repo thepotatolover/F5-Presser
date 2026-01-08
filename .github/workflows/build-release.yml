@@ -106,7 +106,7 @@ jobs:
         echo "Built executable: F5-Presser"
         ls -lh F5-Presser
     
-    - name: 📦 Create DMG package
+    - name: 📦 Create DMG package with background
       shell: bash
       run: |
         # Create DMG directory structure
@@ -114,15 +114,93 @@ jobs:
         cp dist/F5-Presser dmg_package/
         chmod +x dmg_package/F5-Presser
         
-        # Create DMG using hdiutil (native macOS tool)
-        # UDZO format = compressed read-only DMG
-        hdiutil create -volname "F5 Presser" -srcfolder dmg_package -ov -format UDZO -imagekey zlib-level=9 dist/F5-Presser.dmg
+        # Copy background image if it exists
+        if [ -f "background.png" ]; then
+          cp background.png dmg_package/.background.png
+          echo "✅ Background image found and copied"
+        else
+          echo "⚠️  background.png not found, creating DMG without custom background"
+        fi
         
-        echo "✅ DMG created successfully"
-        ls -lh dist/F5-Presser.dmg
+        # Create a temporary read-write DMG
+        TEMP_DMG="temp_f5_presser.dmg"
+        hdiutil create -srcfolder dmg_package -volname "F5 Presser" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size 50m "$TEMP_DMG"
         
-        # Cleanup temporary directory
+        # Mount the DMG
+        DEVICE=$(hdiutil attach -readwrite -noverify -noautoopen "$TEMP_DMG" | egrep '^/dev/' | sed 1q | awk '{print $1}')
+        MOUNT_POINT="/Volumes/F5 Presser"
+        
+        # Wait for mount to complete
+        sleep 2
+        
+        # Create Applications symlink
+        ln -s /Applications "$MOUNT_POINT/Applications" || true
+        
+        # Set background and window properties using AppleScript
+        if [ -f "$MOUNT_POINT/.background.png" ]; then
+          osascript <<EOF
+            tell application "Finder"
+              tell disk "F5 Presser"
+                open
+                set current view of container window to icon view
+                set toolbar visible of container window to false
+                set statusbar visible of container window to false
+                set the bounds of container window to {400, 100, 920, 420}
+                set viewOptions to the icon view options of container window
+                set arrangement of viewOptions to not arranged
+                set icon size of viewOptions to 72
+                delay 1
+                set background picture of viewOptions to file ".background.png"
+                set position of item "F5-Presser" of container window to {160, 205}
+                set position of item "Applications" of container window to {360, 205}
+                close
+                open
+                update without registering applications
+                delay 2
+              end tell
+            end tell
+          EOF
+          echo "✅ Background image and window layout configured"
+        else
+          # Set window properties without background
+          osascript <<EOF
+            tell application "Finder"
+              tell disk "F5 Presser"
+                open
+                set current view of container window to icon view
+                set toolbar visible of container window to false
+                set statusbar visible of container window to false
+                set the bounds of container window to {400, 100, 920, 420}
+                set viewOptions to the icon view options of container window
+                set arrangement of viewOptions to not arranged
+                set icon size of viewOptions to 72
+                set position of item "F5-Presser" of container window to {160, 205}
+                set position of item "Applications" of container window to {360, 205}
+                close
+                open
+                update without registering applications
+                delay 2
+              end tell
+            end tell
+          EOF
+          echo "✅ Window layout configured (no background image)"
+        fi
+        
+        # Unmount the DMG
+        hdiutil detach "$DEVICE" || true
+        
+        # Wait a moment for unmount to complete
+        sleep 2
+        
+        # Convert to compressed read-only DMG
+        hdiutil convert "$TEMP_DMG" -format UDZO -imagekey zlib-level=9 -o dist/F5-Presser.dmg
+        
+        # Cleanup
+        rm -f "$TEMP_DMG"
         rm -rf dmg_package
+        
+        echo "✅ DMG created successfully with background"
+        ls -lh dist/F5-Presser.dmg
     
     - name: 📤 Upload macOS artifact
       uses: actions/upload-artifact@v4
