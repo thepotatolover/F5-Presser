@@ -30,27 +30,10 @@ env:
   PYTHON_VERSION: '3.11'
 
 jobs:
-  build:
-    name: 🔨 Build Executables
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            name: Windows
-            artifact_name: F5-Presser-Windows.exe
-            build_enabled: ${{ github.event.inputs.build_windows != 'false' }}
-          - os: macos-latest
-            name: macOS
-            artifact_name: F5-Presser-macOS
-            build_enabled: ${{ github.event.inputs.build_macos == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
-          - os: ubuntu-latest
-            name: Linux
-            artifact_name: F5-Presser-Linux
-            build_enabled: ${{ github.event.inputs.build_linux == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
-    
-    runs-on: ${{ matrix.os }}
-    if: matrix.build_enabled != 'false'
+  build-windows:
+    name: 🔨 Build Windows Executable
+    runs-on: windows-latest
+    if: github.event.inputs.build_windows != 'false' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
     
     steps:
     - name: 📥 Checkout code
@@ -69,14 +52,48 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
     
-    - name: 🔨 Build executable with PyInstaller (Windows)
-      if: runner.os == 'Windows'
+    - name: 🔨 Build executable with PyInstaller
       shell: bash
       run: |
         pyinstaller --onefile --name "F5-Presser" --clean --noconsole main.py
     
-    - name: 🔨 Build executable with PyInstaller (Unix)
-      if: runner.os != 'Windows'
+    - name: 📦 Prepare artifact
+      shell: bash
+      run: |
+        cd dist
+        echo "Built executable: F5-Presser.exe"
+        ls -lh F5-Presser.exe
+    
+    - name: 📤 Upload Windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: F5-Presser-Windows
+        path: dist/F5-Presser.exe
+        retention-days: 30
+  
+  build-macos:
+    name: 🔨 Build macOS Executable
+    runs-on: macos-latest
+    if: github.event.inputs.build_macos == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 📦 Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: 🔨 Build executable with PyInstaller
       shell: bash
       run: |
         pyinstaller --onefile --name "F5-Presser" --clean main.py
@@ -84,46 +101,75 @@ jobs:
     - name: 📦 Prepare artifact
       shell: bash
       run: |
-        if [[ "${{ runner.os }}" == "Windows" ]]; then
-          cd dist
-          echo "Built executable: F5-Presser.exe"
-          ls -lh F5-Presser.exe
-        else
-          cd dist
-          chmod +x F5-Presser
-          echo "Built executable: F5-Presser"
-          ls -lh F5-Presser
-        fi
-    
-    - name: 📤 Upload Windows artifact
-      if: runner.os == 'Windows'
-      uses: actions/upload-artifact@v4
-      with:
-        name: F5-Presser-Windows
-        path: dist/F5-Presser.exe
-        retention-days: 30
+        cd dist
+        chmod +x F5-Presser
+        echo "Built executable: F5-Presser"
+        ls -lh F5-Presser
     
     - name: 📤 Upload macOS artifact
-      if: runner.os == 'macOS'
       uses: actions/upload-artifact@v4
       with:
         name: F5-Presser-macOS
         path: dist/F5-Presser
         retention-days: 30
+  
+  build-linux:
+    name: 🔨 Build Linux Executable
+    runs-on: ubuntu-latest
+    if: github.event.inputs.build_linux == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 📦 Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: 🔨 Build executable with PyInstaller
+      shell: bash
+      run: |
+        pyinstaller --onefile --name "F5-Presser" --clean main.py
+    
+    - name: 📦 Prepare artifact
+      shell: bash
+      run: |
+        cd dist
+        chmod +x F5-Presser
+        echo "Built executable: F5-Presser"
+        ls -lh F5-Presser
     
     - name: 📤 Upload Linux artifact
-      if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
         name: F5-Presser-Linux
         path: dist/F5-Presser
         retention-days: 30
+  
+  build:
+    name: 🔨 Build Executables
+    needs: [build-windows, build-macos, build-linux]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: ✅ Build jobs completed
+      run: echo "Build jobs completed"
 
   release:
     name: 🚀 Create Release
-    needs: build
+    needs: [build-windows, build-macos, build-linux]
+    if: always() && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: 📥 Checkout code
