@@ -65,7 +65,7 @@ jobs:
         ls -lh F5-Presser.exe
     
     - name: 📤 Upload Windows artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: F5-Presser-Windows
         path: dist/F5-Presser.exe
@@ -166,7 +166,7 @@ jobs:
         ls -lh dist/F5-Presser.dmg
     
     - name: 📤 Upload macOS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: F5-Presser-macOS
         path: dist/F5-Presser.dmg
@@ -208,7 +208,7 @@ jobs:
         ls -lh F5-Presser
     
     - name: 📤 Upload Linux artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: F5-Presser-Linux
         path: dist/F5-Presser
